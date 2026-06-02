@@ -4,6 +4,7 @@ import br.com.fiap.feedback.report.domain.model.FeedbackResumo;
 import br.com.fiap.feedback.report.domain.port.out.BuscarFeedbacksPort;
 import br.com.fiap.feedback.report.infrastructure.adapter.out.repository.entity.FeedbackEntity;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.transaction.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -13,6 +14,7 @@ import java.util.List;
 public class FeedbackReportRepository implements BuscarFeedbacksPort {
 
     @Override
+    @Transactional
     public List<FeedbackResumo> buscarPorPeriodo(LocalDate dataInicio, LocalDate dataFim) {
         LocalDateTime inicio = dataInicio.atStartOfDay();
         LocalDateTime fim = dataFim.atTime(23, 59, 59);

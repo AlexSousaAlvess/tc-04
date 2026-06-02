@@ -4,6 +4,7 @@ import br.com.fiap.feedback.processor.domain.model.Feedback;
 import br.com.fiap.feedback.processor.domain.port.out.SalvarFeedbackPort;
 import br.com.fiap.feedback.processor.infrastructure.adapter.out.repository.entity.FeedbackEntity;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.transaction.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -11,6 +12,7 @@ import java.time.LocalDateTime;
 public class FeedbackRepository implements SalvarFeedbackPort {
 
     @Override
+    @Transactional
     public void salvar(Feedback feedback) {
         FeedbackEntity entity = new FeedbackEntity();
         entity.feedbackId = feedback.getId();

@@ -23,8 +23,12 @@ public class WeeklyReportHandler implements RequestHandler<Map<String, Object>, 
     public String handleRequest(Map<String, Object> event, Context context) {
         try {
             LocalDate hoje = LocalDate.now();
-            LocalDate dataInicio = hoje.minusDays(7);
-            LocalDate dataFim = hoje.minusDays(1);
+            LocalDate dataInicio = event.containsKey("dataInicio")
+                ? LocalDate.parse((String) event.get("dataInicio"))
+                : hoje.minusDays(7);
+            LocalDate dataFim = event.containsKey("dataFim")
+                ? LocalDate.parse((String) event.get("dataFim"))
+                : hoje.minusDays(1);
 
             Log.infof("Gerando relatório semanal de %s a %s", dataInicio, dataFim);
 
