@@ -1,0 +1,134 @@
+name: Build & Deploy Lambdas
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  AWS_REGION: us-east-1
+  JAVA_VERSION: '21'
+
+jobs:
+  build-and-test:
+    name: Build e Testes
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: feedbackdb
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: temurin
+          cache: maven
+
+      - name: Inicializar banco de dados
+        run: |
+          psql -h localhost -U postgres -d feedbackdb \
+            -f infrastructure/database/V1__create_feedbacks_table.sql
+        env:
+          PGPASSWORD: postgres
+
+      - name: Build todos os módulos
+        run: mvn clean package -DskipTests --batch-mode
+
+      - name: Executar testes
+        run: mvn test --batch-mode
+        env:
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_NAME: feedbackdb
+          DB_USER: postgres
+          DB_PASSWORD: postgres
+
+      - name: Upload artefatos
+        uses: actions/upload-artifact@v4
+        with:
+          name: lambda-zips
+          path: |
+            feedback-api/target/function.zip
+            feedback-processor/target/function.zip
+            notification-sender/target/function.zip
+            weekly-report/target/function.zip
+          retention-days: 1
+
+  deploy:
+    name: Deploy para AWS
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download artefatos
+        uses: actions/download-artifact@v4
+        with:
+          name: lambda-zips
+
+      - name: Configurar credenciais AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region:            ${{ env.AWS_REGION }}
+
+      - name: Deploy feedback-api
+        run: |
+          aws lambda update-function-code \
+            --function-name feedback-platform-prod-feedback-api \
+            --zip-file fileb://feedback-api/target/function.zip
+
+      - name: Deploy feedback-processor
+        run: |
+          aws lambda update-function-code \
+            --function-name feedback-platform-prod-feedback-processor \
+            --zip-file fileb://feedback-processor/target/function.zip
+
+      - name: Deploy notification-sender
+        run: |
+          aws lambda update-function-code \
+            --function-name feedback-platform-prod-notification-sender \
+            --zip-file fileb://notification-sender/target/function.zip
+
+      - name: Deploy weekly-report
+        run: |
+          aws lambda update-function-code \
+            --function-name feedback-platform-prod-weekly-report \
+            --zip-file fileb://weekly-report/target/function.zip
+
+      - name: Aguardar atualização das Lambdas
+        run: |
+          for fn in feedback-api feedback-processor notification-sender weekly-report; do
+            echo "Aguardando $fn..."
+            aws lambda wait function-updated \
+              --function-name feedback-platform-prod-$fn
+          done
+
+      - name: Notificar deploy
+        run: |
+          echo "Deploy concluído para as funções:"
+          echo "  - feedback-platform-prod-feedback-api"
+          echo "  - feedback-platform-prod-feedback-processor"
+          echo "  - feedback-platform-prod-notification-sender"
+          echo "  - feedback-platform-prod-weekly-report"

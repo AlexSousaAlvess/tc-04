@@ -1,0 +1,8 @@
+aws_region       = "us-east-1"
+project_name     = "feedback-platform"
+environment      = "prod"
+db_name          = "feedbackdb"
+db_username      = "feedbackuser"
+db_password      = "SUBSTITUA_POR_SENHA_SEGURA"
+admin_email      = "admin@suaempresa.com"
+ses_sender_email = "noreply@suaempresa.com"

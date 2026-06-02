@@ -1,0 +1,272 @@
+{
+  "info": {
+    "name": "Feedback Platform - FIAP Tech Challenge",
+    "_postman_id": "feedback-platform-tc04",
+    "description": "Plataforma de Feedback Serverless — AWS Lambda + API Gateway\n\nEndpoint: https://2y2n3hzaci.execute-api.us-east-1.amazonaws.com/prod",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://2y2n3hzaci.execute-api.us-east-1.amazonaws.com/prod",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Feedback BAIXA (nota 7-10)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"descricao\": \"Aula excelente, conteudo bem estruturado e exemplos praticos muito claros\",\n  \"nota\": 9\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/avaliacao",
+          "host": ["{{base_url}}"],
+          "path": ["avaliacao"]
+        },
+        "description": "Envia um feedback com nota alta (7-10).\nUrgência calculada: BAIXA\nAção: salvo no banco, sem notificação."
+      },
+      "response": [
+        {
+          "name": "201 Created - Urgência BAIXA",
+          "status": "Created",
+          "code": 201,
+          "header": [
+            { "key": "Content-Type", "value": "application/json" }
+          ],
+          "body": "{\n  \"id\": \"550e8400-e29b-41d4-a716-446655440000\",\n  \"urgencia\": \"BAIXA\",\n  \"mensagem\": \"Feedback recebido com sucesso\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "2. Feedback MEDIA (nota 4-6)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"descricao\": \"Aula razoavel, alguns pontos poderiam ser mais detalhados\",\n  \"nota\": 5\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/avaliacao",
+          "host": ["{{base_url}}"],
+          "path": ["avaliacao"]
+        },
+        "description": "Envia um feedback com nota média (4-6).\nUrgência calculada: MEDIA\nAção: salvo no banco, sem notificação."
+      },
+      "response": [
+        {
+          "name": "201 Created - Urgência MEDIA",
+          "status": "Created",
+          "code": 201,
+          "header": [
+            { "key": "Content-Type", "value": "application/json" }
+          ],
+          "body": "{\n  \"id\": \"550e8400-e29b-41d4-a716-446655440001\",\n  \"urgencia\": \"MEDIA\",\n  \"mensagem\": \"Feedback recebido com sucesso\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "3. Feedback CRITICA (nota 0-3) 🚨",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"descricao\": \"Aula muito confusa, professor sem didatica e sem exemplos praticos\",\n  \"nota\": 1\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/avaliacao",
+          "host": ["{{base_url}}"],
+          "path": ["avaliacao"]
+        },
+        "description": "Envia um feedback com nota crítica (0-3).\nUrgência calculada: CRITICA\nAção: salvo no banco + e-mail de alerta enviado ao admin em até 30 segundos."
+      },
+      "response": [
+        {
+          "name": "201 Created - Urgência CRITICA",
+          "status": "Created",
+          "code": 201,
+          "header": [
+            { "key": "Content-Type", "value": "application/json" }
+          ],
+          "body": "{\n  \"id\": \"550e8400-e29b-41d4-a716-446655440002\",\n  \"urgencia\": \"CRITICA\",\n  \"mensagem\": \"Feedback recebido com sucesso\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "4. Feedback nota mínima (nota 0) 🚨",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"descricao\": \"Pessima aula, nao aprendi absolutamente nada\",\n  \"nota\": 0\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/avaliacao",
+          "host": ["{{base_url}}"],
+          "path": ["avaliacao"]
+        },
+        "description": "Envia um feedback com nota 0 (mínima possível).\nUrgência calculada: CRITICA\nAção: salvo no banco + e-mail de alerta enviado ao admin."
+      }
+    },
+    {
+      "name": "5. Erro - Nota inválida (acima de 10)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"descricao\": \"Teste com nota invalida\",\n  \"nota\": 11\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/avaliacao",
+          "host": ["{{base_url}}"],
+          "path": ["avaliacao"]
+        },
+        "description": "Testa validação: nota fora do intervalo (0-10).\nEsperado: HTTP 400 Bad Request."
+      },
+      "response": [
+        {
+          "name": "400 Bad Request - Nota inválida",
+          "status": "Bad Request",
+          "code": 400,
+          "header": [
+            { "key": "Content-Type", "value": "application/json" }
+          ],
+          "body": "{\n  \"erro\": \"Nota deve estar entre 0 e 10\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "6. Erro - Descrição vazia",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"descricao\": \"\",\n  \"nota\": 7\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/avaliacao",
+          "host": ["{{base_url}}"],
+          "path": ["avaliacao"]
+        },
+        "description": "Testa validação: descrição vazia.\nEsperado: HTTP 400 Bad Request."
+      },
+      "response": [
+        {
+          "name": "400 Bad Request - Descrição vazia",
+          "status": "Bad Request",
+          "code": 400,
+          "header": [
+            { "key": "Content-Type", "value": "application/json" }
+          ],
+          "body": "{\n  \"erro\": \"Descrição não pode ser vazia\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "7. Erro - Nota ausente",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"descricao\": \"Feedback sem campo nota\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/avaliacao",
+          "host": ["{{base_url}}"],
+          "path": ["avaliacao"]
+        },
+        "description": "Testa validação: campo 'nota' ausente.\nEsperado: HTTP 400 Bad Request."
+      },
+      "response": [
+        {
+          "name": "400 Bad Request - Nota ausente",
+          "status": "Bad Request",
+          "code": 400,
+          "header": [
+            { "key": "Content-Type", "value": "application/json" }
+          ],
+          "body": "{\n  \"erro\": \"Campo 'nota' é obrigatório\"\n}"
+        }
+      ]
+    }
+  ]
+}
